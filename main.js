@@ -8,9 +8,12 @@ import {
     OrbitControls
 } from 'three/addons/controls/OrbitControls.js';
 
+import * as
+TWEEN from '@tweenjs/tween.js';
+
 import {
-    Tween
-} from '@tweenjs/tween.js';
+    InteractionManager
+} from "three.interactive"
 
 
 const scene = new THREE.Scene();
@@ -26,7 +29,7 @@ const renderer = new THREE.WebGL1Renderer({
 
 renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setSize(window.innerWidth, window.innerHeight)
-camera.position.setZ(30)
+camera.position.setZ(200)
 
 renderer.render(scene, camera);
 
@@ -134,14 +137,41 @@ const sun = new THREE.Mesh(
     new THREE.SphereGeometry(100, 50, 50), sunMaterial
 )
 
+const interactionManager = new InteractionManager(renderer, camera, document.querySelector(".bg"))
+
+
+earth.addEventListener('click', (e) => {
+    e.stopPropagation()
+    console.log('earth was clicked')
+    // camera.position.setZ(250)
+
+    const coord = {
+        z: camera.position.z
+    }
+
+    new TWEEN.Tween(coord)
+        .to({
+            z: 50
+        })
+        .onUpdate(() => camera.position.setZ(coord.z))
+        .start()
+})
+
 sun.position.set(300, 0, 0)
+
+
+interactionManager.add(earth)
+interactionManager.update()
+
 
 scene.add(sun)
 scene.add(earth)
 scene.add(clouds)
 scene.background = spaceTexture
 
-function animate() {
+let time = 0.5
+
+function animate(time) {
     requestAnimationFrame(animate);
 
     earth.rotation.x += 0.0001;
@@ -149,6 +179,7 @@ function animate() {
     clouds.rotation.y += 0.0001;
 
     renderer.render(scene, camera);
+    TWEEN.update(time)
 }
 
 // renderer.render(scene, camera);
@@ -180,4 +211,4 @@ controls.update();
 //   </div>
 // `
 
-setupCounter(document.querySelector('#counter'))
+// setupCounter(document.querySelector('#counter'))
